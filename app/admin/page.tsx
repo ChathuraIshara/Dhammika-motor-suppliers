@@ -33,6 +33,8 @@ export default function AdminDashboardPage() {
     toggleAvailability,
     addCategory,
     resetToMockData,
+    uploadPartImage,
+    isSupabaseConnected,
   } = useInventory();
 
   // Search & Filter state
@@ -42,6 +44,8 @@ export default function AdminDashboardPage() {
   // Modals state
   const [isPartModalOpen, setIsPartModalOpen] = useState(false);
   const [editingPart, setEditingPart] = useState<AutoPart | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmittingPart, setIsSubmittingPart] = useState(false);
 
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -74,10 +78,12 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setFormErrors((prev) => ({ ...prev, imageUrl: "Image must be smaller than 5 MB" }));
+    if (file.size > 10 * 1024 * 1024) {
+      setFormErrors((prev) => ({ ...prev, imageUrl: "Image must be smaller than 10 MB" }));
       return;
     }
+
+    setSelectedFile(file);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -128,6 +134,7 @@ export default function AdminDashboardPage() {
   // Open modal for creating new part
   const handleOpenAddPart = () => {
     setEditingPart(null);
+    setSelectedFile(null);
     setFormData({
       name: "",
       partNumber: "",
@@ -144,6 +151,7 @@ export default function AdminDashboardPage() {
   // Open modal for editing existing part
   const handleOpenEditPart = (part: AutoPart) => {
     setEditingPart(part);
+    setSelectedFile(null);
     setFormData({
       name: part.name,
       partNumber: part.partNumber,
@@ -158,7 +166,7 @@ export default function AdminDashboardPage() {
   };
 
   // Validate and submit Part Form
-  const handleSubmitPart = (e: React.FormEvent) => {
+  const handleSubmitPart = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: Record<string, string> = {};
 
@@ -175,34 +183,57 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    const matchedCat = categories.find((c) => c.id === formData.categoryId);
-    const categoryName = matchedCat ? matchedCat.name : "General";
+    setIsSubmittingPart(true);
 
-    if (editingPart) {
-      updatePart(editingPart.id, {
-        name: formData.name.trim(),
-        partNumber: formData.partNumber.trim().toUpperCase(),
-        categoryId: formData.categoryId,
-        categoryName,
-        price: Number(formData.price),
-        imageUrl: formData.imageUrl.trim(),
-        isAvailable: formData.isAvailable,
-        description: formData.description.trim(),
-      });
-    } else {
-      addPart({
-        name: formData.name.trim(),
-        partNumber: formData.partNumber.trim().toUpperCase(),
-        categoryId: formData.categoryId,
-        categoryName,
-        price: Number(formData.price),
-        imageUrl: formData.imageUrl.trim(),
-        isAvailable: formData.isAvailable,
-        description: formData.description.trim(),
-      });
+    try {
+      let finalImageUrl = formData.imageUrl.trim();
+
+      // If user picked a local file, upload to Supabase Storage
+      if (selectedFile) {
+        try {
+          const uploadedUrl = await uploadPartImage(selectedFile);
+          if (uploadedUrl) {
+            finalImageUrl = uploadedUrl;
+          }
+        } catch (uploadErr) {
+          console.warn("Storage upload failed, using local preview/dataUrl:", uploadErr);
+        }
+      }
+
+      const matchedCat = categories.find((c) => c.id === formData.categoryId);
+      const categoryName = matchedCat ? matchedCat.name : "General";
+
+      if (editingPart) {
+        await updatePart(editingPart.id, {
+          name: formData.name.trim(),
+          partNumber: formData.partNumber.trim().toUpperCase(),
+          categoryId: formData.categoryId,
+          categoryName,
+          price: Number(formData.price),
+          imageUrl: finalImageUrl,
+          isAvailable: formData.isAvailable,
+          description: formData.description.trim(),
+        });
+      } else {
+        await addPart({
+          name: formData.name.trim(),
+          partNumber: formData.partNumber.trim().toUpperCase(),
+          categoryId: formData.categoryId,
+          categoryName,
+          price: Number(formData.price),
+          imageUrl: finalImageUrl,
+          isAvailable: formData.isAvailable,
+          description: formData.description.trim(),
+        });
+      }
+
+      setIsPartModalOpen(false);
+      setSelectedFile(null);
+    } catch (err) {
+      console.error("Error submitting part:", err);
+    } finally {
+      setIsSubmittingPart(false);
     }
-
-    setIsPartModalOpen(false);
   };
 
   // Handle standalone Add Category Modal
@@ -258,6 +289,17 @@ export default function AdminDashboardPage() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">
                   ADMIN
                 </span>
+                {isSupabaseConnected ? (
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Supabase Live
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    Local Cache
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="w-5 h-0.5 rounded-full bg-[#4361EE]" />
@@ -888,9 +930,14 @@ export default function AdminDashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm shadow-xs transition-all min-h-[44px] cursor-pointer"
+                  disabled={isSubmittingPart}
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-60 text-white font-bold text-sm shadow-xs transition-all min-h-[44px] cursor-pointer flex items-center gap-2"
                 >
-                  {editingPart ? "Save Changes" : "Create Auto Part"}
+                  {isSubmittingPart
+                    ? "Saving..."
+                    : editingPart
+                    ? "Save Changes"
+                    : "Create Auto Part"}
                 </button>
               </div>
               </div>
