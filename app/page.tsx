@@ -10,8 +10,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Settings,
-  Package,
-  LayoutGrid,
+  CarFront,
   FilterX,
 } from "lucide-react";
 import { useInventory } from "@/context/InventoryContext";
@@ -65,15 +64,20 @@ export default function CustomerCatalogPage() {
       <header className="sticky top-0 z-30 bg-[#F4F6FA] pt-4 pb-2">
         <div className="max-w-2xl mx-auto px-4">
 
-          {/* Top Row: Title + Settings Icon */}
+          {/* Top Row: Brand + Settings Icon */}
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-0.5">
-                Parts Catalog
-              </p>
-              <h1 className="text-xl font-black text-gray-900 leading-tight">
-                Dhammika Motor
-              </h1>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4361EE] to-[#3451D1] shadow-md shadow-[#4361EE]/25 flex items-center justify-center text-white"
+                aria-hidden="true"
+              >
+                <CarFront className="w-6 h-6" strokeWidth={2.25} />
+              </div>
+              <div>
+                <h1 className="text-xl font-black text-gray-900 leading-tight">
+                  Dhammika Motor Suppliers
+                </h1>
+              </div>
             </div>
             <Link
               href="/admin/login"
