@@ -3,10 +3,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { Lock, ArrowLeft, KeyRound, ShieldCheck, UserRound } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const [adminName, setAdminName] = useState("");
   const [pin, setPin] = useState("1234");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,10 +15,14 @@ export default function AdminLoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!adminName.trim()) { setError("Please enter your name"); return; }
     if (!pin.trim()) { setError("Please enter a PIN or password"); return; }
     setIsLoading(true);
     try {
-      if (typeof window !== "undefined") sessionStorage.setItem("dhammika_admin_auth", "true");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("dhammika_admin_auth", "true");
+        sessionStorage.setItem("dhammika_admin_name", adminName.trim());
+      }
       setTimeout(() => router.push("/admin"), 300);
     } catch { setIsLoading(false); }
   };
@@ -59,6 +64,28 @@ export default function AdminLoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              {/* Admin Name Input Row */}
+              <div className="flex items-center gap-3 p-3.5 bg-[#F4F6FA] rounded-2xl">
+                <div className="w-9 h-9 bg-[#4361EE]/10 rounded-xl flex items-center justify-center shrink-0">
+                  <UserRound className="w-4 h-4 text-[#4361EE]" />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="admin-name" className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">
+                    Admin Name
+                  </label>
+                  <input
+                    id="admin-name"
+                    type="text"
+                    value={adminName}
+                    onChange={(e) => setAdminName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-base font-semibold focus:outline-none min-h-[28px]"
+                    autoComplete="name"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
               {/* PIN Input Row */}
               <div className="flex items-center gap-3 p-3.5 bg-[#F4F6FA] rounded-2xl">
                 <div className="w-9 h-9 bg-[#4361EE]/10 rounded-xl flex items-center justify-center shrink-0">
@@ -75,7 +102,6 @@ export default function AdminLoginPage() {
                     onChange={(e) => setPin(e.target.value)}
                     placeholder="Enter your PIN"
                     className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-base font-semibold focus:outline-none min-h-[28px]"
-                    autoFocus
                   />
                 </div>
               </div>
@@ -102,33 +128,6 @@ export default function AdminLoginPage() {
                 {isLoading ? "Signing In..." : "Sign In"}
               </button>
             </form>
-          </div>
-
-          {/* Quick presets card */}
-          <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-100">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                Quick Test Credentials
-              </p>
-            </div>
-            <div className="flex gap-0 divide-x divide-gray-100">
-              <button
-                type="button"
-                onClick={() => setPin("1234")}
-                className="flex-1 py-4 text-center cursor-pointer hover:bg-[#F4F6FA] transition-colors"
-              >
-                <p className="text-xs font-bold text-gray-900 font-mono">1234</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">PIN</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPin("admin")}
-                className="flex-1 py-4 text-center cursor-pointer hover:bg-[#F4F6FA] transition-colors"
-              >
-                <p className="text-xs font-bold text-gray-900 font-mono">admin</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">Password</p>
-              </button>
-            </div>
           </div>
 
         </div>

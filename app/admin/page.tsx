@@ -56,6 +56,11 @@ export default function AdminDashboardPage() {
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [adminName] = useState(() =>
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("dhammika_admin_name") || "Admin"
+      : "Admin"
+  );
 
   // Modals state
   const [isPartModalOpen, setIsPartModalOpen] = useState(false);
@@ -81,6 +86,11 @@ export default function AdminDashboardPage() {
   // Quick inline category creator within part modal
   const [isInlineAddingCategory, setIsInlineAddingCategory] = useState(false);
   const [inlineCategoryInput, setInlineCategoryInput] = useState("");
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("dhammika_admin_auth");
+    sessionStorage.removeItem("dhammika_admin_name");
+  };
 
   // Filtered parts for table
   const filteredParts = useMemo(() => {
@@ -249,6 +259,9 @@ export default function AdminDashboardPage() {
                 </span>
               </div>
               <p className="text-xs text-slate-500">Inventory & Catalog Management</p>
+              <p className="text-xs font-semibold text-blue-600 mt-0.5">
+                Logged in as {adminName}
+              </p>
             </div>
           </div>
 
@@ -265,6 +278,7 @@ export default function AdminDashboardPage() {
             {/* Logout */}
             <Link
               href="/admin/login"
+              onClick={handleLogout}
               className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors border border-slate-200 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
               title="Sign Out"
               aria-label="Sign Out"

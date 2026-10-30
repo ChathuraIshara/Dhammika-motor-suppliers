@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Settings,
   CarFront,
-  FilterX,
 } from "lucide-react";
 import { useInventory } from "@/context/InventoryContext";
 import { AutoPart } from "@/data/mockData";
