@@ -289,17 +289,20 @@ export default function AdminDashboardPage() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">
                   ADMIN
                 </span>
-                {isSupabaseConnected ? (
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Supabase Live
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    Local Cache
-                  </span>
-                )}
+                <span
+                  className="relative flex h-2.5 w-2.5"
+                  title={isSupabaseConnected ? "Live" : "Cache"}
+                >
+                  {isSupabaseConnected && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  )}
+                  <span
+                    className={cn(
+                      "relative inline-flex rounded-full h-2.5 w-2.5",
+                      isSupabaseConnected ? "bg-emerald-500" : "bg-amber-500"
+                    )}
+                  />
+                </span>
               </div>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="w-5 h-0.5 rounded-full bg-[#4361EE]" />
