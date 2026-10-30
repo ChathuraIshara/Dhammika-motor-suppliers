@@ -844,7 +844,7 @@ export default function AdminDashboardPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="e.g. Compatible with Toyota Hiace KDH200 2005-2018"
+                  placeholder="e.g.Toyota Hiace KDH200"
                   className="w-full px-3.5 py-2.5 text-base rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white min-h-[44px]"
                 />
               </div>
