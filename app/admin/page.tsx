@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CarFront,
   Plus,
@@ -19,11 +20,16 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useInventory } from "@/context/InventoryContext";
+import { supabase } from "@/lib/supabase";
 import type { AutoPart } from "@/data/mockData";
 import { formatLKR, cn } from "@/lib/utils";
 import CategoryPdfExport from "@/components/CategoryPdfExport";
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [adminEmail, setAdminEmail] = useState<string>("");
+
   const {
     categories,
     parts,
@@ -36,6 +42,41 @@ export default function AdminDashboardPage() {
     uploadPartImage,
     isSupabaseConnected,
   } = useInventory();
+
+  // Protect Admin Route with Supabase Auth
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+
+      if (!session?.user) {
+        router.replace("/admin/login");
+      } else {
+        setIsAuthenticated(true);
+        setAdminEmail(session.user.email || "Admin");
+      }
+    }
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      if (!session?.user) {
+        setIsAuthenticated(false);
+        router.replace("/admin/login");
+      } else {
+        setIsAuthenticated(true);
+        setAdminEmail(session.user.email || "Admin");
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router]);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,9 +105,13 @@ export default function AdminDashboardPage() {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("dhammika_admin_auth");
-    sessionStorage.removeItem("dhammika_admin_name");
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+    router.replace("/admin/login");
   };
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,6 +309,21 @@ export default function AdminDashboardPage() {
     }
   };
 
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-[#F4F6FA] flex flex-col items-center justify-center p-4">
+        <div className="w-10 h-10 border-3 border-[#4361EE] border-t-transparent rounded-full animate-spin mb-3" />
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+          Verifying Admin Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 pb-16">
       {/* ================= ADMIN TOP NAVIGATION ================= */}
@@ -323,17 +383,24 @@ export default function AdminDashboardPage() {
               <span>Customer Catalog View</span>
             </Link>
 
-            {/* Logout */}
-            <Link
-              href="/admin/login"
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors border border-slate-200 min-h-[44px] cursor-pointer"
-              title="Sign Out"
-              aria-label="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline text-xs font-semibold">Sign Out</span>
-            </Link>
+            {/* Admin Email & Logout */}
+            <div className="flex items-center gap-2">
+              {adminEmail && (
+                <span className="hidden md:inline-block text-xs font-semibold text-slate-500 max-w-[180px] truncate">
+                  {adminEmail}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors border border-slate-200 min-h-[44px] cursor-pointer"
+                title="Sign Out"
+                aria-label="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline text-xs font-semibold">Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
