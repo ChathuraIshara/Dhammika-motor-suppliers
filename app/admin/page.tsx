@@ -78,10 +78,6 @@ export default function AdminDashboardPage() {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Quick inline category creator within part modal
-  const [isInlineAddingCategory, setIsInlineAddingCategory] = useState(false);
-  const [inlineCategoryInput, setInlineCategoryInput] = useState("");
-
   const handleLogout = () => {
     sessionStorage.removeItem("dhammika_admin_auth");
     sessionStorage.removeItem("dhammika_admin_name");
@@ -128,7 +124,6 @@ export default function AdminDashboardPage() {
       description: "",
     });
     setFormErrors({});
-    setIsInlineAddingCategory(false);
     setIsPartModalOpen(true);
   };
 
@@ -145,7 +140,6 @@ export default function AdminDashboardPage() {
       description: part.description || "",
     });
     setFormErrors({});
-    setIsInlineAddingCategory(false);
     setIsPartModalOpen(true);
   };
 
@@ -195,16 +189,6 @@ export default function AdminDashboardPage() {
     }
 
     setIsPartModalOpen(false);
-  };
-
-  // Handle inline category creation from inside Add/Edit Part Modal
-  const handleCreateInlineCategory = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!inlineCategoryInput.trim()) return;
-    const created = addCategory(inlineCategoryInput.trim());
-    setFormData((prev) => ({ ...prev, categoryId: created.id }));
-    setInlineCategoryInput("");
-    setIsInlineAddingCategory(false);
   };
 
   // Handle standalone Add Category Modal
@@ -703,7 +687,7 @@ export default function AdminDashboardPage() {
             {/* Form */}
             <form
               onSubmit={handleSubmitPart}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pb-6 sm:p-6"
+              className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pb-6 sm:p-6"
             >
               <div className="space-y-4">
               {/* Part Name */}
@@ -715,7 +699,7 @@ export default function AdminDashboardPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Front Ceramic Brake Pads - Hilux KDH"
+                  placeholder="e.g. Front Ceramic Brake Pads"
                   className={cn(
                     "w-full px-3.5 py-2.5 text-base rounded-xl border focus:outline-none focus:ring-2 min-h-[44px]",
                     formErrors.name
@@ -778,63 +762,29 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Category Dropdown with quick create */}
+              {/* Category Dropdown */}
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Category *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsInlineAddingCategory(!isInlineAddingCategory)}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 min-h-[36px] flex items-center cursor-pointer"
-                  >
-                    {isInlineAddingCategory ? "Cancel new category" : "+ Quick Add Category"}
-                  </button>
-                </div>
-
-                {isInlineAddingCategory ? (
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 mb-2">
-                    <span className="text-xs font-semibold text-slate-700 block">
-                      Create & select category:
-                    </span>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={inlineCategoryInput}
-                        onChange={(e) => setInlineCategoryInput(e.target.value)}
-                        placeholder="e.g. Exhaust & Emission"
-                        className="flex-1 px-3 py-1.5 text-base rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[44px]"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleCreateInlineCategory}
-                        className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg min-h-[44px] cursor-pointer"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <select
-                    value={formData.categoryId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, categoryId: e.target.value })
-                    }
-                    className={cn(
-                      "w-full px-3.5 py-2.5 text-base rounded-xl border focus:outline-none focus:ring-2 min-h-[44px] bg-white",
-                      formErrors.categoryId
-                        ? "border-rose-400 focus:ring-rose-500"
-                        : "border-slate-300 focus:ring-blue-600"
-                    )}
-                  >
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Category *
+                </label>
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, categoryId: e.target.value })
+                  }
+                  className={cn(
+                    "w-full px-3.5 py-2.5 text-base rounded-xl border focus:outline-none focus:ring-2 min-h-[44px] bg-white",
+                    formErrors.categoryId
+                      ? "border-rose-400 focus:ring-rose-500"
+                      : "border-slate-300 focus:ring-blue-600"
+                  )}
+                >
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
                 {formErrors.categoryId && (
                   <p className="text-xs text-rose-600 mt-1">{formErrors.categoryId}</p>
                 )}
