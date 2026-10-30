@@ -164,13 +164,7 @@ export default function CustomerCatalogPage() {
       <main className="max-w-2xl mx-auto w-full flex-1 px-4 pt-4 pb-28">
 
         {/* Count + Reset */}
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500 font-medium">
-            <span className="text-gray-900 font-bold">{totalMatchingParts}</span> parts
-            {searchQuery && (
-              <span> for &ldquo;<span className="text-[#4361EE] font-semibold">{searchQuery}</span>&rdquo;</span>
-            )}
-          </p>
+        <div className="flex items-center justify-between mb-4">          
           {(searchQuery || selectedCategoryId !== "all") && (
             <button
               onClick={handleResetFilters}
