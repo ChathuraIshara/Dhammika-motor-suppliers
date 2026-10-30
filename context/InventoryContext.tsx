@@ -71,11 +71,15 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         .select("*")
         .order("created_at", { ascending: false });
 
+      if (catError) console.warn("Supabase categories fetch error:", catError.message || catError);
+      if (partsError) console.warn("Supabase parts fetch error:", partsError.message || partsError);
+
       if (!catError && !partsError && catData && partsData) {
         setCategories(catData as Category[]);
         setParts(partsData.map((p) => dbToPart(p as unknown as DbPartRow)));
         setIsSupabaseConnected(true);
         setIsLoaded(true);
+        console.log("Supabase connected successfully! Loaded", catData.length, "categories and", partsData.length, "parts.");
         return;
       }
     } catch (err) {
