@@ -5,12 +5,30 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Category, AutoPart } from "@/data/mockData";
 import { formatLKR } from "@/lib/utils";
-import { FileText, Download, X, CheckCircle2 } from "lucide-react";
+import { FileText, Download, X, CheckCircle2, ChevronDown } from "lucide-react";
 
 interface CategoryPdfExportProps {
   categories: Category[];
   parts: AutoPart[];
 }
+
+const loadImageAsDataUrl = async (source: string): Promise<string | null> => {
+  if (source.startsWith("data:image/")) return source;
+
+  try {
+    const response = await fetch(source);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+};
 
 export default function CategoryPdfExport({
   categories,
@@ -42,126 +60,90 @@ export default function CategoryPdfExport({
         format: "a4",
       });
 
-      const primaryBlue: [number, number, number] = [37, 99, 235]; // Tailwind blue-600
-      const slateDark: [number, number, number] = [30, 41, 59]; // slate-800
-      const slateMuted: [number, number, number] = [100, 116, 139]; // slate-500
-
       // Page dimensions
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
 
-      // Header top banner styling (Soft Light Blue Tint)
-      doc.setFillColor(240, 249, 255);
-      doc.rect(0, 0, pageWidth, 42, "F");
-
-      // Blue accent line at top
-      doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
-      doc.rect(0, 0, pageWidth, 4, "F");
-
-      // Main Title
+      // Centered printable header
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(19);
-      doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
-      doc.text("DHAMMIKA MOTOR SUPPLIERS", margin, 17);
+      doc.setFontSize(18);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Dhammika Motor Suppliers", pageWidth / 2, 18, { align: "center" });
 
-      // Subtitle
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9.5);
-      doc.setTextColor(slateMuted[0], slateMuted[1], slateMuted[2]);
-      doc.text(
-        "Automotive Spare Parts Importers & Distributors • Colombo, Sri Lanka",
-        margin,
-        23
-      );
+      doc.setFontSize(12);
+      doc.text(selectedCategoryName, margin, 27);
 
-      // Category Heading banner
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12.5);
-      doc.setTextColor(slateDark[0], slateDark[1], slateDark[2]);
-      doc.text(
-        `CATALOG: ${selectedCategoryName.toUpperCase()}`,
-        margin,
-        32
-      );
-
-      // Date & Total Count on right
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
-      doc.setTextColor(slateMuted[0], slateMuted[1], slateMuted[2]);
-      doc.text(`Generated: ${dateStr}`, pageWidth - margin, 18, { align: "right" });
-      doc.text(`Total Items: ${filteredParts.length}`, pageWidth - margin, 24, {
-        align: "right",
-      });
-      doc.text(`Status: Official Price List`, pageWidth - margin, 30, {
-        align: "right",
-      });
-
-      // Prepare Table Data (Row #, Part Number, Item Name, Category/Status, Price)
-      const tableRows = filteredParts.map((part, index) => [
-        (index + 1).toString(),
+      const imageData = await Promise.all(filteredParts.map((part) => loadImageAsDataUrl(part.imageUrl)));
+      const tableRows = filteredParts.map((part) => [
         part.partNumber,
         part.name,
-        selectedCategoryId === "all" ? part.categoryName : (part.isAvailable ? "In Stock" : "Out of Stock"),
         formatLKR(part.price),
+        "",
       ]);
 
-      const headers = [
-        [
-          "#",
-          "Part Number",
-          "Item Description",
-          selectedCategoryId === "all" ? "Category" : "Status",
-          "Price (LKR)",
-        ],
-      ];
+      const headers = [["Part No.", "Part Name", "Price (LKR)", "Image"]];
 
       // AutoTable generation
       autoTable(doc, {
         head: headers,
         body: tableRows,
-        startY: 46,
+        startY: 34,
         margin: { left: margin, right: margin, bottom: 20 },
-        theme: "striped",
+        theme: "grid",
+        styles: {
+          lineColor: [0, 0, 0],
+          lineWidth: 0.25,
+        },
         headStyles: {
-          fillColor: primaryBlue,
-          textColor: [255, 255, 255],
-          fontSize: 9,
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 11,
           fontStyle: "bold",
-          halign: "left",
-          cellPadding: 3.5,
+          halign: "center",
+          cellPadding: 4,
         },
         bodyStyles: {
-          fontSize: 8.5,
-          textColor: [30, 41, 59],
-          cellPadding: 3,
+          fontSize: 11,
+          textColor: [0, 0, 0],
+          cellPadding: 4,
+          minCellHeight: 25,
+          valign: "middle",
         },
         alternateRowStyles: {
-          fillColor: [248, 250, 252],
+          fillColor: [255, 255, 255],
         },
         columnStyles: {
-          0: { cellWidth: 10, halign: "center" },
-          1: { cellWidth: 32, fontStyle: "bold", textColor: [37, 99, 235] },
-          2: { cellWidth: "auto" },
-          3: { cellWidth: 30, halign: "center" },
-          4: { cellWidth: 32, halign: "right", fontStyle: "bold", textColor: [15, 23, 42] },
+          0: { cellWidth: 42, fontStyle: "bold", textColor: [0, 0, 0] },
+          1: { cellWidth: "auto", fontSize: 12 },
+          2: { cellWidth: 36, halign: "right", fontStyle: "bold", textColor: [0, 0, 0] },
+          3: { cellWidth: 28, halign: "center" },
+        },
+        didDrawCell: (data) => {
+          if (data.section === "body" && data.column.index === 3) {
+            const image = imageData[data.row.index];
+            if (image) {
+              const imageSize = 17;
+              doc.addImage(
+                image,
+                image.startsWith("data:image/png") ? "PNG" : "JPEG",
+                data.cell.x + (data.cell.width - imageSize) / 2,
+                data.cell.y + (data.cell.height - imageSize) / 2,
+                imageSize,
+                imageSize
+              );
+            }
+          }
         },
         didDrawPage: () => {
           const totalPagesExp = "{total_pages_count_string}";
           const pageNumber = (doc.internal as unknown as { getNumberOfPages: () => number }).getNumberOfPages();
           
           doc.setFontSize(8);
-          doc.setTextColor(148, 163, 184);
+          doc.setTextColor(0, 0, 0);
           doc.setFont("helvetica", "normal");
           
-          doc.setDrawColor(226, 232, 240);
+          doc.setDrawColor(0, 0, 0);
           doc.setLineWidth(0.3);
           doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
 
@@ -264,24 +246,30 @@ export default function CategoryPdfExport({
                     >
                       Select Category to Export
                     </label>
-                    <select
-                      id="pdf-category-select"
-                      value={selectedCategoryId}
-                      onChange={(e) => setSelectedCategoryId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-base rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-xs min-h-[44px]"
-                    >
-                      <option value="all">
-                        📋 All Categories ({parts.length} items)
-                      </option>
-                      {categories.map((cat) => {
-                        const count = parts.filter((p) => p.categoryId === cat.id).length;
-                        return (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name} ({count} items)
-                          </option>
-                        );
-                      })}
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="pdf-category-select"
+                        value={selectedCategoryId}
+                        onChange={(e) => setSelectedCategoryId(e.target.value)}
+                        className="w-full appearance-none px-3.5 py-2.5 pr-11 text-base rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-xs min-h-[44px]"
+                      >
+                        <option value="all">
+                          All Categories ({parts.length} items)
+                        </option>
+                        {categories.map((cat) => {
+                          const count = parts.filter((p) => p.categoryId === cat.id).length;
+                          return (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name} ({count} items)
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <ChevronDown
+                        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                        aria-hidden="true"
+                      />
+                    </div>
                   </div>
 
                   {/* Summary Box */}

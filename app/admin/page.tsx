@@ -928,7 +928,7 @@ export default function AdminDashboardPage() {
                   type="text"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
-                  placeholder="e.g. Body & Panels, Cooling & Heating"
+                  placeholder="e.g. Body & Panels"
                   className="w-full px-3.5 py-2.5 text-base rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[44px]"
                   autoFocus
                 />
