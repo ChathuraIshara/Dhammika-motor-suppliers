@@ -666,11 +666,11 @@ export default function AdminDashboardPage() {
       {/* ================= ADD / EDIT PART MODAL ================= */}
       {isPartModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-3 backdrop-blur-xs sm:p-4"
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden my-6">
+          <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl sm:max-h-[calc(100dvh-2rem)]">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
@@ -701,7 +701,11 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmitPart} className="p-6 space-y-4">
+            <form
+              onSubmit={handleSubmitPart}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pb-6 sm:p-6"
+            >
+              <div className="space-y-4">
               {/* Part Name */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -935,7 +939,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Modal Action Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsPartModalOpen(false)}
@@ -949,6 +953,7 @@ export default function AdminDashboardPage() {
                 >
                   {editingPart ? "Save Changes" : "Create Auto Part"}
                 </button>
+              </div>
               </div>
             </form>
           </div>
