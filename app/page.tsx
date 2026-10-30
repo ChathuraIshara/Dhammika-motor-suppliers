@@ -68,15 +68,26 @@ export default function CustomerCatalogPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div
-                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4361EE] to-[#3451D1] shadow-md shadow-[#4361EE]/25 flex items-center justify-center text-white"
+                className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4361EE] via-[#3B50C8] to-[#273A9B] shadow-lg shadow-[#4361EE]/30 flex items-center justify-center text-white overflow-hidden"
                 aria-hidden="true"
               >
+                <div className="absolute -right-3 -top-3 w-8 h-8 rounded-full bg-white/15" />
+                <div className="absolute -left-3 -bottom-3 w-8 h-8 rounded-full bg-white/10" />
                 <CarFront className="w-6 h-6" strokeWidth={2.25} />
               </div>
-              <div>
-                <h1 className="text-xl font-black text-gray-900 leading-tight">
-                  Dhammika Motor Suppliers
+              <div className="min-w-0">
+                <h1 className="text-[1.15rem] font-black tracking-tight leading-none whitespace-nowrap">
+                  <span className="text-gray-900">Dhammika Motor </span>
+                  <span className="bg-gradient-to-r from-[#4361EE] to-[#6D7FF2] bg-clip-text text-transparent">
+                    Suppliers
+                  </span>
                 </h1>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="w-5 h-0.5 rounded-full bg-[#4361EE]" />
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+                    Trusted automotive parts
+                  </span>
+                </div>
               </div>
             </div>
             <Link
