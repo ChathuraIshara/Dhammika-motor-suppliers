@@ -16,30 +16,12 @@ import {
   RefreshCw,
   LogOut,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { useInventory } from "@/context/InventoryContext";
 import type { AutoPart } from "@/data/mockData";
 import { formatLKR, cn } from "@/lib/utils";
 import CategoryPdfExport from "@/components/CategoryPdfExport";
-
-const SAMPLE_IMAGE_PRESETS = [
-  {
-    name: "Brake Pads",
-    url: "https://images.unsplash.com/photo-1600705722908-bab1e61c0b4d?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    name: "Engine / Filters",
-    url: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    name: "Suspension",
-    url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    name: "Alternator / Electric",
-    url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=600&q=80",
-  },
-];
 
 export default function AdminDashboardPage() {
   const {
@@ -83,6 +65,38 @@ export default function AdminDashboardPage() {
     sessionStorage.removeItem("dhammika_admin_name");
   };
 
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setFormErrors((prev) => ({ ...prev, imageUrl: "Please select an image file" }));
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFormErrors((prev) => ({ ...prev, imageUrl: "Image must be smaller than 5 MB" }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageData = reader.result;
+      if (typeof imageData === "string") {
+        setFormData((prev) => ({ ...prev, imageUrl: imageData }));
+        setFormErrors((prev) => {
+          const next = { ...prev };
+          delete next.imageUrl;
+          return next;
+        });
+      }
+    };
+    reader.onerror = () => {
+      setFormErrors((prev) => ({ ...prev, imageUrl: "Could not read the selected image" }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Filtered parts for table
   const filteredParts = useMemo(() => {
     return parts.filter((part) => {
@@ -119,7 +133,7 @@ export default function AdminDashboardPage() {
       partNumber: "",
       categoryId: categories[0]?.id || "",
       price: "",
-      imageUrl: SAMPLE_IMAGE_PRESETS[0].url,
+      imageUrl: "",
       isAvailable: true,
       description: "",
     });
@@ -154,7 +168,7 @@ export default function AdminDashboardPage() {
     if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
       errors.price = "Enter a valid price greater than 0";
     }
-    if (!formData.imageUrl.trim()) errors.imageUrl = "Image URL is required";
+    if (!formData.imageUrl.trim()) errors.imageUrl = "Image file is required";
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -658,18 +672,19 @@ export default function AdminDashboardPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs">
+                <div className="relative p-2.5 bg-gradient-to-br from-[#4361EE] to-[#273A9B] text-white rounded-2xl shadow-md shadow-blue-600/25 overflow-hidden">
+                  <div className="absolute -right-2 -top-2 w-5 h-5 rounded-full bg-white/15" />
                   {editingPart ? (
-                    <Edit2 className="w-5 h-5" />
+                    <Edit2 className="relative w-5 h-5" />
                   ) : (
-                    <Plus className="w-5 h-5" />
+                    <Plus className="relative w-5 h-5" />
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-slate-900 leading-tight">
+                  <h3 className="font-black text-lg tracking-tight text-slate-900 leading-tight">
                     {editingPart ? "Edit Auto Part" : "Add New Auto Part"}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
                     {editingPart ? `Updating ${editingPart.partNumber}` : "Add an item to the catalog"}
                   </p>
                 </div>
@@ -677,7 +692,7 @@ export default function AdminDashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsPartModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer transition-colors"
+                className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-2xl min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer transition-all"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -767,43 +782,46 @@ export default function AdminDashboardPage() {
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   Category *
                 </label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, categoryId: e.target.value })
-                  }
-                  className={cn(
-                    "w-full px-3.5 py-2.5 text-base rounded-xl border focus:outline-none focus:ring-2 min-h-[44px] bg-white",
-                    formErrors.categoryId
-                      ? "border-rose-400 focus:ring-rose-500"
-                      : "border-slate-300 focus:ring-blue-600"
-                  )}
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={formData.categoryId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, categoryId: e.target.value })
+                    }
+                    className={cn(
+                      "w-full appearance-none px-3.5 py-2.5 pr-11 text-base rounded-xl border focus:outline-none focus:ring-2 min-h-[44px] bg-white",
+                      formErrors.categoryId
+                        ? "border-rose-400 focus:ring-rose-500"
+                        : "border-slate-300 focus:ring-blue-600"
+                    )}
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                    aria-hidden="true"
+                  />
+                </div>
                 {formErrors.categoryId && (
                   <p className="text-xs text-rose-600 mt-1">{formErrors.categoryId}</p>
                 )}
               </div>
 
-              {/* Image URL with Preset Pickers & Preview */}
+              {/* Image File */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Image URL *
+                  Image File *
                 </label>
                 <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
-                  placeholder="https://images.unsplash.com/photo-..."
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
                   className={cn(
-                    "w-full px-3.5 py-2.5 text-base rounded-xl border focus:outline-none focus:ring-2 min-h-[44px]",
+                    "w-full cursor-pointer rounded-xl border bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 focus:outline-none focus:ring-2 min-h-[44px]",
                     formErrors.imageUrl
                       ? "border-rose-400 focus:ring-rose-500 bg-rose-50/50"
                       : "border-slate-300 focus:ring-blue-600 bg-white"
@@ -813,40 +831,6 @@ export default function AdminDashboardPage() {
                   <p className="text-xs text-rose-600 mt-1">{formErrors.imageUrl}</p>
                 )}
 
-                {/* Sample Presets */}
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] text-slate-400 font-medium mr-1">
-                    Presets:
-                  </span>
-                  {SAMPLE_IMAGE_PRESETS.map((p) => (
-                    <button
-                      key={p.name}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, imageUrl: p.url })}
-                      className="text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md min-h-[36px] flex items-center cursor-pointer transition-colors"
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Thumbnail Preview */}
-                {formData.imageUrl && (
-                  <div className="mt-2.5 flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-200 shrink-0">
-                      <Image
-                        src={formData.imageUrl}
-                        alt="Preview"
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    </div>
-                    <span className="text-xs text-slate-600 truncate flex-1 font-medium">
-                      Image Preview Available
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Description (Optional) */}
