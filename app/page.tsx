@@ -162,21 +162,6 @@ export default function CustomerCatalogPage() {
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="max-w-2xl mx-auto w-full flex-1 px-4 pt-4 pb-28">
-
-        {/* Count + Reset */}
-        <div className="flex items-center justify-between mb-4">          
-          {(searchQuery || selectedCategoryId !== "all") && (
-            <button
-              onClick={handleResetFilters}
-              type="button"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#4361EE] hover:opacity-80 transition-opacity cursor-pointer min-h-[40px]"
-            >
-              <FilterX className="w-3.5 h-3.5" />
-              Reset
-            </button>
-          )}
-        </div>
-
         {/* Loading Skeleton */}
         {!isLoaded ? (
           <div className="space-y-6">
