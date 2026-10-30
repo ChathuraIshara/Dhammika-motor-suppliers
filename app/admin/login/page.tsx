@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, ArrowLeft, KeyRound, ShieldCheck, UserRound } from "lucide-react";
+import { Lock, ArrowLeft, KeyRound, ShieldCheck, UserRound, CarFront } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -48,11 +48,18 @@ export default function AdminLoginPage() {
 
           {/* Profile / Brand area — like reference Settings page */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-3xl bg-[#4361EE] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-[#4361EE]/30">
-              <Lock className="w-10 h-10 text-white" />
+            <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-[#4361EE] via-[#3B50C8] to-[#273A9B] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-[#4361EE]/30 text-white overflow-hidden">
+              <div className="absolute -right-4 -top-4 w-12 h-12 rounded-full bg-white/15" />
+              <div className="absolute -left-4 -bottom-4 w-12 h-12 rounded-full bg-white/10" />
+              <CarFront className="w-10 h-10" strokeWidth={2.25} />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Admin Portal</h1>
-            <p className="text-sm text-gray-400 mt-1">Dhammika Motor Suppliers</p>
+            <h1 className="text-2xl font-black tracking-tight">
+              <span className="text-gray-900">Dhammika Motor </span>
+              <span className="bg-gradient-to-r from-[#4361EE] to-[#6D7FF2] bg-clip-text text-transparent">
+                Suppliers
+              </span>
+            </h1>
+            <p className="text-sm font-semibold text-gray-400 mt-1">Admin Portal</p>
           </div>
 
           {/* Login Card — styled like reference white card list */}

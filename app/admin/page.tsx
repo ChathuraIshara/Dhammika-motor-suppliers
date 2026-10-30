@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Package,
+  CarFront,
   Plus,
   FolderPlus,
   Search,
@@ -56,11 +56,6 @@ export default function AdminDashboardPage() {
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
-  const [adminName] = useState(() =>
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("dhammika_admin_name") || "Admin"
-      : "Admin"
-  );
 
   // Modals state
   const [isPartModalOpen, setIsPartModalOpen] = useState(false);
@@ -243,25 +238,35 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 pb-16">
       {/* ================= ADMIN TOP NAVIGATION ================= */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
+      <header className="bg-[#F4F6FA] border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-xs">
-              <Package className="w-5 h-5" />
+            <div
+              className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-[#4361EE] via-[#3B50C8] to-[#273A9B] shadow-lg shadow-[#4361EE]/30 flex items-center justify-center text-white overflow-hidden"
+              aria-hidden="true"
+            >
+              <div className="absolute -right-3 -top-3 w-8 h-8 rounded-full bg-white/15" />
+              <div className="absolute -left-3 -bottom-3 w-8 h-8 rounded-full bg-white/10" />
+              <CarFront className="w-5 h-5" strokeWidth={2.25} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-bold text-base sm:text-lg text-slate-900 leading-tight">
-                  Dhammika Motor Suppliers
+                <h1 className="font-black text-base sm:text-lg tracking-tight leading-tight">
+                  <span className="text-slate-900">Dhammika Motor </span>
+                  <span className="bg-gradient-to-r from-[#4361EE] to-[#6D7FF2] bg-clip-text text-transparent">
+                    Suppliers
+                  </span>
                 </h1>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">
                   ADMIN
                 </span>
               </div>
-              <p className="text-xs text-slate-500">Inventory & Catalog Management</p>
-              <p className="text-xs font-semibold text-blue-600 mt-0.5">
-                Logged in as {adminName}
-              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="w-5 h-0.5 rounded-full bg-[#4361EE]" />
+                <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Inventory & Catalog Management
+                </p>
+              </div>
             </div>
           </div>
 
