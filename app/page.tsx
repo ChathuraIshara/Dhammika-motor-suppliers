@@ -299,61 +299,6 @@ export default function CustomerCatalogPage() {
         )}
       </main>
 
-      {/* ===== BOTTOM NAVIGATION BAR ===== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-lg">
-        <div className="max-w-2xl mx-auto flex items-center justify-around px-4 py-2">
-          {/* Home — active */}
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedCategoryId("all");
-              setSearchQuery("");
-            }}
-            className="flex flex-col items-center gap-1 min-w-[56px] py-1 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-xl bg-[#4361EE] flex items-center justify-center">
-              <LayoutGrid className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-[10px] font-bold text-[#4361EE]">Home</span>
-          </button>
-
-          {/* Inventory */}
-          <button
-            type="button"
-            onClick={() => setSelectedCategoryId("all")}
-            className="flex flex-col items-center gap-1 min-w-[56px] py-1 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center">
-              <Package className="w-5 h-5 text-gray-400" />
-            </div>
-            <span className="text-[10px] font-semibold text-gray-400">Inventory</span>
-          </button>
-
-          {/* Search */}
-          <button
-            type="button"
-            onClick={() => document.querySelector<HTMLInputElement>('input[type="text"]')?.focus()}
-            className="flex flex-col items-center gap-1 min-w-[56px] py-1 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center">
-              <Search className="w-5 h-5 text-gray-400" />
-            </div>
-            <span className="text-[10px] font-semibold text-gray-400">Search</span>
-          </button>
-
-          {/* Admin / Settings */}
-          <Link
-            href="/admin/login"
-            className="flex flex-col items-center gap-1 min-w-[56px] py-1 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center">
-              <Settings className="w-5 h-5 text-gray-400" />
-            </div>
-            <span className="text-[10px] font-semibold text-gray-400">Settings</span>
-          </Link>
-        </div>
-      </nav>
-
       {/* Image Detail Modal */}
       <ImageModal part={activeModalPart} onClose={() => setActiveModalPart(null)} />
     </div>
