@@ -30,14 +30,12 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-[#F4F6FA] flex flex-col">
       {/* Top bar */}
-      <div className="px-4 pt-12 pb-4 max-w-sm mx-auto w-full">
+      <div className="w-full max-w-3xl px-4 pt-8 pb-4 mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors min-h-[44px]"
+          className="inline-flex items-center gap-2 rounded-2xl border border-[#4361EE]/20 bg-[#4361EE]/10 px-4 py-2.5 text-sm font-bold text-[#3451D1] shadow-sm shadow-[#4361EE]/10 hover:border-[#4361EE]/40 hover:bg-[#4361EE]/15 hover:text-[#273A9B] transition-all min-h-[44px]"
         >
-          <div className="w-9 h-9 bg-white rounded-2xl shadow-sm flex items-center justify-center">
-            <ArrowLeft className="w-4 h-4" />
-          </div>
+          <ArrowLeft className="w-4 h-4" />
           <span>Back to Catalog</span>
         </Link>
       </div>
