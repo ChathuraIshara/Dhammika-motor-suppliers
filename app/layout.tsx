@@ -24,7 +24,13 @@ export const metadata: Metadata = {
   title: "Dhammika Motor Suppliers | Auto Parts Catalog",
   description:
     "Mobile-first digital spare parts catalog for vehicle repair shops and motor mechanics in Sri Lanka.",
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
