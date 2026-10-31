@@ -124,37 +124,51 @@ export default function CustomerCatalogPage() {
 
           {/* Category Pills */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            <button
-              onClick={() => setSelectedCategoryId("all")}
-              type="button"
-              className={cn(
-                "whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all shrink-0 min-h-[38px] cursor-pointer",
-                selectedCategoryId === "all"
-                  ? "bg-[#4361EE] text-white shadow-md shadow-[#4361EE]/30"
-                  : "bg-white text-gray-500 shadow-sm hover:bg-gray-100"
-              )}
-            >
-              All ({parts.length})
-            </button>
-            {categories.map((cat) => {
-              const count = parts.filter((p) => p.categoryId === cat.id).length;
-              const isSelected = selectedCategoryId === cat.id;
-              return (
+            {!isLoaded ? (
+              <div className="flex items-center gap-2">
+                {[75, 95, 85, 110].map((w, idx) => (
+                  <div
+                    key={idx}
+                    className="h-[38px] bg-white/70 rounded-full shadow-xs animate-pulse shrink-0"
+                    style={{ width: `${w}px` }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <>
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategoryId(cat.id)}
+                  onClick={() => setSelectedCategoryId("all")}
                   type="button"
                   className={cn(
                     "whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all shrink-0 min-h-[38px] cursor-pointer",
-                    isSelected
+                    selectedCategoryId === "all"
                       ? "bg-[#4361EE] text-white shadow-md shadow-[#4361EE]/30"
                       : "bg-white text-gray-500 shadow-sm hover:bg-gray-100"
                   )}
                 >
-                  {cat.name} ({count})
+                  All ({parts.length})
                 </button>
-              );
-            })}
+                {categories.map((cat) => {
+                  const count = parts.filter((p) => p.categoryId === cat.id).length;
+                  const isSelected = selectedCategoryId === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategoryId(cat.id)}
+                      type="button"
+                      className={cn(
+                        "whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all shrink-0 min-h-[38px] cursor-pointer",
+                        isSelected
+                          ? "bg-[#4361EE] text-white shadow-md shadow-[#4361EE]/30"
+                          : "bg-white text-gray-500 shadow-sm hover:bg-gray-100"
+                      )}
+                    >
+                      {cat.name} ({count})
+                    </button>
+                  );
+                })}
+              </>
+            )}
           </div>
         </div>
       </header>

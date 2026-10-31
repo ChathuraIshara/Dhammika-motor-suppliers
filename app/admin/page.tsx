@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
     deletePart,
     toggleAvailability,
     addCategory,
-    resetToMockData,
+    refreshData,
     uploadPartImage,
     isSupabaseConnected,
   } = useInventory();
@@ -298,15 +298,12 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Reset to default mock data confirmation
-  const handleResetData = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to reset all inventory to the initial factory mock data? Any custom parts will be reset."
-      )
-    ) {
-      resetToMockData();
-    }
+  // Refresh data from database
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    await refreshData();
+    setTimeout(() => setIsRefreshing(false), 500);
   };
 
   if (isAuthenticated === null) {
@@ -478,15 +475,16 @@ export default function AdminDashboardPage() {
               <CategoryPdfExport categories={categories} parts={parts} />
             </div>
 
-            {/* Reset Factory Mock Data */}
+            {/* Refresh Data from Database */}
             <button
               type="button"
-              onClick={handleResetData}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-xs font-medium transition-colors min-h-[44px] cursor-pointer"
-              title="Reset inventory to initial mock dataset"
+              onClick={handleRefreshData}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-xs font-medium transition-colors min-h-[44px] cursor-pointer disabled:opacity-50"
+              title="Refresh inventory from live database"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Reset Mock Data</span>
+              <RefreshCw className={cn("w-3.5 h-3.5", isRefreshing && "animate-spin text-[#4361EE]")} />
+              <span>{isRefreshing ? "Refreshing..." : "Refresh Data"}</span>
             </button>
           </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { AutoPart, Category, INITIAL_CATEGORIES, INITIAL_PARTS } from "@/data/mockData";
+import { AutoPart, Category } from "@/data/mockData";
 import { supabase } from "@/lib/supabase";
 
 interface InventoryContextType {
@@ -51,12 +51,12 @@ function dbToPart(row: DbPartRow): AutoPart {
 }
 
 export function InventoryProvider({ children }: { children: React.ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
-  const [parts, setParts] = useState<AutoPart[]>(INITIAL_PARTS);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [parts, setParts] = useState<AutoPart[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
 
-  // Load from Supabase (with fallback to localStorage/mock data)
+  // Load from Supabase
   const loadData = useCallback(async () => {
     try {
       // 1. Fetch categories from Supabase
@@ -79,14 +79,13 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         setParts(partsData.map((p) => dbToPart(p as unknown as DbPartRow)));
         setIsSupabaseConnected(true);
         setIsLoaded(true);
-        console.log("Supabase connected successfully! Loaded", catData.length, "categories and", partsData.length, "parts.");
         return;
       }
     } catch (err) {
       console.warn("Supabase load attempt encountered an error, falling back to local cache:", err);
     }
 
-    // Fallback: Read from localStorage or initial mock data
+    // Fallback: Read from localStorage if offline
     try {
       const savedParts = localStorage.getItem(STORAGE_KEY_PARTS);
       const savedCats = localStorage.getItem(STORAGE_KEY_CATS);
@@ -281,13 +280,12 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     return newCat;
   };
 
-  // Reset to Mock Data
+  // Reset / Clear local cache and reload fresh from database
   const resetToMockData = async () => {
-    setCategories(INITIAL_CATEGORIES);
-    setParts(INITIAL_PARTS);
     try {
       localStorage.removeItem(STORAGE_KEY_PARTS);
       localStorage.removeItem(STORAGE_KEY_CATS);
+      await loadData();
     } catch (e) {
       console.error(e);
     }
